@@ -24,6 +24,7 @@ subprojects {
     }
 
     repositories {
+        mavenLocal()
     }
 
     loom {
@@ -33,6 +34,16 @@ subprojects {
     dependencies {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings loom.officialMojangMappings()
+
+        compileOnly 'org.apache.logging.log4j:log4j-api:2.25.1'
+        compileOnly 'com.google.code.gson:gson:2.8.9'
+
+        compileOnly 'org.ow2.asm:asm:9.6'
+        compileOnly 'org.ow2.asm:asm-tree:9.6'
+        compileOnly 'org.ow2.asm:asm-util:9.6'
+        compileOnly 'org.ow2.asm:asm-commons:9.6'
+
+        compileOnly 'io.github.notstirred:dasm:3.1.0'
     }
 
     java {

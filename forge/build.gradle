@@ -1,3 +1,5 @@
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
+
 plugins {
     id 'com.gradleup.shadow'
 }
@@ -34,6 +36,30 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
+
+    compileOnly "net.fabricmc:mapping-io:0.7.1"
+    shadowBundle "net.fabricmc:mapping-io:0.7.1"
+
+    shadowBundle('io.github.notstirred:dasm:3.1.0') {
+        transitive = false
+    }
+}
+
+// This is a temporary hack, forge doesn't have mojmap->srg at runtime, and they're moving to mojmap always
+// We just include the mappings file for this special case
+// If we start supporting lots of old versions, an annotation processor in mods creating a refmap is the better approach
+tasks.register("addMappings") {
+    LoomGradleExtensionAPI loomApi = project.getExtensions().getByType(LoomGradleExtensionAPI.class);
+    File mappingsFile = new File(loomApi.mappingsFile.getParent(), "mappings-srg.tiny")
+
+
+    if (!mappingsFile.name.endsWith(".tiny") || !mappingsFile.text.startsWith("tiny\t2\t0")) {
+        throw new RuntimeException("MAPPINGS ARE NOT AS EXPECTED. DasmForgeTransformationService expects tiny2 format.")
+    }
+
+    def resourcesDir = sourceSets.main.output.resourcesDir
+    resourcesDir.mkdirs()
+    new File(resourcesDir, "mappings").text = mappingsFile.text
 }
 
 processResources {
@@ -42,11 +68,20 @@ processResources {
     filesMatching('META-INF/mods.toml') {
         expand version: project.version
     }
+
+    finalizedBy(tasks.named("addMappings"))
 }
 
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
+}
+
+tasks.shadowJar {
+    minimize {
+        exclude(dependency("io.github.notstirred:dasm:.*")) // don't minimize dasm, we need all of it!
+    }
+    relocate("net.fabricmc.mappingio", "io.github.notstirred.dasm.mappingio")
 }
 
 remapJar {
