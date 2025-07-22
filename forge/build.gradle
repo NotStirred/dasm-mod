@@ -59,7 +59,7 @@ tasks.register("addMappings") {
 
     def resourcesDir = sourceSets.main.output.resourcesDir
     resourcesDir.mkdirs()
-    new File(resourcesDir, "mappings").text = mappingsFile.text
+    new File(resourcesDir, "mappings-srg.tiny").text = mappingsFile.text
 }
 
 processResources {

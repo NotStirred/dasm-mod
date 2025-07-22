@@ -137,7 +137,7 @@ public class DasmForgeTransformationService implements ITransformationService {
     }
 
     private MappingsProvider createMappingsProvider() {
-        InputStream resource = DasmForgeTransformationService.class.getClassLoader().getResourceAsStream("mappings");
+        InputStream resource = DasmForgeTransformationService.class.getClassLoader().getResourceAsStream("mappings-srg.tiny");
 
         if (resource == null || isDev()) {
             logger.info("Using identity mappings {}, {}", resource, isDev());
