@@ -4,8 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public record DasmConfig(
-        @SerializedName("requiredVersion") String requiredVersion,
-        @SerializedName("dasm") List<String> dasmClasses
-) {
+public class DasmConfig {
+    public final @SerializedName("requiredVersion") String requiredVersion;
+    public final @SerializedName("dasm") List<String> dasmClasses;
+
+    public DasmConfig(String requiredVersion, List<String> dasmClasses) {
+        this.requiredVersion = requiredVersion;
+        this.dasmClasses = dasmClasses;
+    }
 }

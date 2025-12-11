@@ -20,21 +20,22 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DasmService {
+    private static final Logger logger = LogManager.getLogger("dasm");
+
     private final ClassNodeProvider classProvider;
     private final Transformer transformer;
     private final AnnotationParser annotationParser;
-
-    private static final Logger logger = LogManager.getLogger("dasm");
 
     public DasmService(MappingsProvider mappingsProvider, ClassNodeProvider classProvider) {
         this.classProvider = classProvider;
@@ -46,20 +47,20 @@ public class DasmService {
         DasmTarget target = getDasmTarget(dasmClassType);
 
         handleNotification(annotationParser.findDasmAnnotations(target.primary));
-        var methodTransformsPrimary = handleNotification(annotationParser.buildContext().buildMethodTargets(target.primary, ""));
-        var classTransform = handleNotification(annotationParser.buildContext().buildClassTarget(target.primary));
-        var methodTransformsSecondary = target.secondary.flatMap(classNode -> {
+        Optional<Collection<MethodTransform>> methodTransformsPrimary = handleNotification(annotationParser.buildContext().buildMethodTargets(target.primary, ""));
+        Optional<ClassTransform> classTransform = handleNotification(annotationParser.buildContext().buildClassTarget(target.primary));
+        Optional<Collection<MethodTransform>> methodTransformsSecondary = target.secondary.flatMap(classNode -> {
             handleNotification(annotationParser.findDasmAnnotations(classNode));
             return handleNotification(annotationParser.buildContext().buildMethodTargets(classNode, ""));
         });
 
-        var methodTransforms = Stream.of(methodTransformsPrimary, methodTransformsSecondary)
+        List<MethodTransform> methodTransforms = Stream.of(methodTransformsPrimary, methodTransformsSecondary)
                 .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(Collection::stream).toList();
+                .flatMap(Collection::stream).collect(Collectors.toList());
 
         if (classTransform.isPresent()) {
             // TODO: nice error
-            assert methodTransformsSecondary.isEmpty() && methodTransformsPrimary.isEmpty() : "Whole class transform WITH method transforms?";
+            assert (!methodTransformsSecondary.isPresent() || methodTransformsSecondary.get().isEmpty()) && (!methodTransformsPrimary.isPresent() || methodTransformsPrimary.get().isEmpty()) : "Whole class transform WITH method transforms?";
             return Either.right(classTransform.get());
         } else {
             return Either.left(methodTransforms);
@@ -68,13 +69,22 @@ public class DasmService {
 
     public ClassNode doTransform(ClassNode input, Either<List<MethodTransform>, ClassTransform> transform) {
         transform.left().ifPresent(methodTransforms -> {
-            handleNotification(transformer.transform(input, methodTransforms));
+            Transformer.TransformResult<List<MethodNode>> result = transformer.transform(input, methodTransforms);
+            handleNotification(result.notifications);
+
+            result.changed.forEach(method -> {
+                // By default, Mixin will merge the native dasm transform method over the dasm output method, this is the easiest way to prevent it
+                // Unfortunately mixin outputs a warning for every case. See MixinApplicatorStandard#isAlreadyMerged
+                if (method.visibleAnnotations == null) method.visibleAnnotations = new ArrayList<>(1);
+                method.visibleAnnotations.add(new AnnotationNode("Lorg/spongepowered/asm/mixin/Final;"));
+            });
+
         });
         transform.right().ifPresent(classTransform -> {
             try {
                 transformer.transform(input, classTransform);
             } catch (NoSuchTypeExists e) { // TODO: remove when dasm doesn't throw here.
-                handleNotification(List.of(new Notification(e.getMessage(), Notification.Kind.ERROR, e.getClass())));
+                handleNotification(Collections.singletonList(new Notification(e.getMessage(), Notification.Kind.ERROR, e.getClass())));
             }
         });
         doDasmOut(input);
@@ -82,7 +92,15 @@ public class DasmService {
     }
 
 
-    private record DasmTarget(ClassNode primary, Optional<ClassNode> secondary) { }
+    private static class DasmTarget {
+        ClassNode primary;
+        Optional<ClassNode> secondary;
+
+        DasmTarget(ClassNode primary, Optional<ClassNode> secondary) {
+            this.primary = primary;
+            this.secondary = secondary;
+        }
+    }
 
     private DasmTarget getDasmTarget(Type dasmType) throws NoSuchTypeExists {
         ClassNode dasmClassNode = this.classProvider.classNode(dasmType);
@@ -110,7 +128,7 @@ public class DasmService {
         ClassWriter classWriter = new ClassWriter(0);
         classNode.accept(classWriter);
         try {
-            Path path = Path.of(".dasm.out/APPLY/" + classNode.name.replace('.', '/') + ".class").toAbsolutePath();
+            Path path = Paths.get(".dasm.out/APPLY/" + classNode.name.replace('.', '/') + ".class").toAbsolutePath();
             Files.createDirectories(path.getParent());
             Files.write(path, classWriter.toByteArray());
         } catch (IOException e) {
@@ -128,7 +146,7 @@ public class DasmService {
     }
 
     private void handleNotification(List<Notification> notifications) {
-        for (var notification : notifications) {
+        for (Notification notification : notifications) {
             switch (notification.kind) {
                 case INFO:
                     logger.info(notification.message);

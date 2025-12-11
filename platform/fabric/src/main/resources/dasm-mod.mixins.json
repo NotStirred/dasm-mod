@@ -1,0 +1,5 @@
+{
+  "minVersion": "0.8",
+  "plugin": "io.github.notstirred.dasm.mod.fabric.DasmConfigPlugin",
+  "package": "io.github.notstirred.dasm.mod.fabric.mixins"
+}

@@ -10,5 +10,7 @@ pluginManagement {
 rootProject.name = 'dasm-mod'
 
 include 'common'
-include 'fabric'
-include 'forge'
+include 'platform'
+include 'platform:fabric'
+include 'platform:forge'
+include 'platform:neoforge'
