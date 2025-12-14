@@ -1,11 +1,11 @@
-import xml from "fast-xml-parser"
+import { XMLParser } from "fast-xml-parser"
 
 const response = await fetch("https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml");
 if (!response.ok) {
     throw new Error(`Neoforge versions response status: ${response.status}`);
 }
 
-const parser = new xml.XMLParser();
+const parser = new XMLParser();
 let data = parser.parse(await response.text());
 
 console.log(data)
