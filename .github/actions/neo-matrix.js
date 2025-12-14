@@ -12,7 +12,7 @@ try {
 
     process.stdout.write(JSON.stringify(data))
 
-    const output = data.metadata.versioning.versions
+    const output = Array.from(data.metadata.versioning.versions)
         .map(node => node.version)
         .filter(version => !version.includes("w")) // filter out weird snapshot versions like 0.25w14craftmine.3-beta
 
