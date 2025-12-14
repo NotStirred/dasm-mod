@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          repository: 'https://github.com/NotStirred/dasm-mod-neoforge-ci'
+          repository: 'NotStirred/dasm-mod-neoforge-ci'
 
       - name: download neo jar
         uses: actions/download-artifact@v4
