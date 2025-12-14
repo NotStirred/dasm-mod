@@ -6,10 +6,7 @@ plugins {
     `java-library`
 }
 
-allprojects {
-    group = "io.github.notstirred"
-    version = "3.2.0"
-}
+var buildSourceAndJavadoc = (System.getenv("SOURCE_JARS") ?: "true") == "true"
 
 subprojects {
     apply(plugin = "java-library")
@@ -29,8 +26,10 @@ subprojects {
     }
 
     java {
-        withSourcesJar()
-        withJavadocJar()
+        if (buildSourceAndJavadoc) {
+            withSourcesJar()
+            withJavadocJar()
+        }
 
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

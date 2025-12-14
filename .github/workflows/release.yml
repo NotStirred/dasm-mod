@@ -21,7 +21,7 @@ jobs:
           java-version: 21
 
       - name: build jars
-        run: ./gradlew build
+        run: SOURCE_JARS=false ./gradlew build
 
       - name: upload neo jar
         uses: actions/upload-artifact@v4
@@ -44,6 +44,7 @@ jobs:
   neo-setup:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
