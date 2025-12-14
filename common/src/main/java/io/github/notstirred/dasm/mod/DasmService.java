@@ -80,9 +80,9 @@ public class DasmService {
     public ClassNode doTransform(ClassNode input, Either<List<MethodTransform>, ClassTransform> transform) {
         transform.left().ifPresent(methodTransforms -> {
             Transformer.TransformResult<List<MethodNode>> result = transformer.transform(input, methodTransforms);
-            handleNotification(result.notifications);
+            handleNotification(result.notifications());
 
-            result.changed.forEach(method -> {
+            result.changed().forEach(method -> {
                 // By default, Mixin will merge the native dasm transform method over the dasm output method, this is the easiest way to prevent it
                 // Unfortunately mixin outputs a warning for every case. See MixinApplicatorStandard#isAlreadyMerged
                 if (method.visibleAnnotations == null) method.visibleAnnotations = new ArrayList<>(1);
