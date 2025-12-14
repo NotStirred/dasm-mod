@@ -16,7 +16,7 @@ subprojects {
     apply(plugin = "com.gradleup.shadow")
 
     group = "io.github.notstirred"
-    version = "3.2.0-SNAPSHOT"
+    version = "3.2.0"
 
     repositories {
         mavenCentral()

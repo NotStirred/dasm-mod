@@ -82,7 +82,6 @@ fun Project.configurePublishing(artifactName: String, setup: MavenPublication.()
         }
     }
     extensions.configure<SigningExtension> {
-        useGpgCmd()
         sign(extensions.getByType<PublishingExtension>().publications["maven"])
     }
 }
