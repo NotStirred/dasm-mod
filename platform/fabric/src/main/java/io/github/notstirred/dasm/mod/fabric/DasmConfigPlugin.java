@@ -46,7 +46,7 @@ public class DasmConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return dasmExtension.shouldApplyMixin(targetClassName, mixinClassName);
+        return true;
     }
 
     @Override

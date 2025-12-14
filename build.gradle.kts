@@ -6,6 +6,11 @@ plugins {
     `java-library`
 }
 
+allprojects {
+    group = "io.github.notstirred"
+    version = "3.2.0"
+}
+
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "com.gradleup.shadow")
@@ -19,7 +24,8 @@ subprojects {
 
     dependencies {
         compileOnly("org.apache.logging.log4j:log4j-api:2.25.1")
-        compileOnly("com.google.code.gson:gson:2.8.9")
+        runtimeOnly("org.apache.logging.log4j:log4j:2.25.1")
+        implementation("com.google.code.gson:gson:2.8.9")
     }
 
     java {

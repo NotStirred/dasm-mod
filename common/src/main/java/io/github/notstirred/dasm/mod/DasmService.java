@@ -43,7 +43,17 @@ public class DasmService {
         this.annotationParser = new AnnotationParser(this.classProvider);
     }
 
-    public Either<List<MethodTransform>, ClassTransform> scanForTransforms(Type dasmClassType) throws NoSuchTypeExists {
+    class DasmTransform {
+        final DasmTarget target;
+        final Either<List<MethodTransform>, ClassTransform> transform;
+
+        DasmTransform(DasmTarget target, Either<List<MethodTransform>, ClassTransform> transform) {
+            this.target = target;
+            this.transform = transform;
+        }
+    }
+
+    DasmTransform scanForTransforms(Type dasmClassType) throws NoSuchTypeExists {
         DasmTarget target = getDasmTarget(dasmClassType);
 
         handleNotification(annotationParser.findDasmAnnotations(target.primary));
@@ -61,9 +71,9 @@ public class DasmService {
         if (classTransform.isPresent()) {
             // TODO: nice error
             assert (!methodTransformsSecondary.isPresent() || methodTransformsSecondary.get().isEmpty()) && (!methodTransformsPrimary.isPresent() || methodTransformsPrimary.get().isEmpty()) : "Whole class transform WITH method transforms?";
-            return Either.right(classTransform.get());
+            return new DasmTransform(target, Either.right(classTransform.get()));
         } else {
-            return Either.left(methodTransforms);
+            return new DasmTransform(target, Either.left(methodTransforms));
         }
     }
 
@@ -92,7 +102,7 @@ public class DasmService {
     }
 
 
-    private static class DasmTarget {
+    static class DasmTarget {
         ClassNode primary;
         Optional<ClassNode> secondary;
 

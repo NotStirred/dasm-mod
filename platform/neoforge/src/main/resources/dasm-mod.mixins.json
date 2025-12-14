@@ -1,5 +1,10 @@
 {
   "minVersion": "0.8",
   "plugin": "io.github.notstirred.dasm.mod.neoforge.DasmConfigPlugin",
-  "package": "io.github.notstirred.dasm.mod.neoforge.mixins"
+  "package": "io.github.notstirred.dasm.mod.dummy.mixins",
+  "mixins": [
+    "Dummy1",
+    "IDummy",
+    "Dummy2"
+  ]
 }

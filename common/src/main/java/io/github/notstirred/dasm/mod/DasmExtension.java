@@ -11,7 +11,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.transformer.ClassInfo;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.mixin.transformer.ext.Extensions;
@@ -34,21 +33,16 @@ public class DasmExtension implements IExtension {
         this.dasmService = new DasmService(mappingsProvider, classProvider);
     }
 
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+    public boolean shouldApplyMixin(String targetClassName) {
         try {
-            Either<List<MethodTransform>, ClassTransform> mixinTransforms = dasmService.scanForTransforms(Type.getObjectType(TypeUtil.classNameToInternalName(mixinClassName)));
-            List<MethodTransform> methodTransforms = mixinTransforms.left().get(); // mixin classes are not allowed class transforms
+            DasmService.DasmTransform dasmTransform = dasmService.scanForTransforms(Type.getObjectType(TypeUtil.classNameToInternalName(targetClassName)));
+            Either<List<MethodTransform>, ClassTransform> targetTransforms = dasmTransform.transform;
 
-            Either<List<MethodTransform>, ClassTransform> targetTransforms = dasmService.scanForTransforms(Type.getObjectType(TypeUtil.classNameToInternalName(targetClassName)));
-            targetTransforms.left().ifPresent(methodTransforms::addAll);
-
-            String key = targetClassName;
-            if (targetTransforms.right().isPresent()) {
-                transforms.put(key, Either.right(targetTransforms.right().get()));
-            } else {
-                transforms.computeIfAbsent(key, k -> Either.left(new ArrayList<>())).left().get()
-                        .addAll(methodTransforms);
-            }
+            String key = dasmTransform.target.primary.name.replace('/', '.');
+            targetTransforms.right().ifPresent(classTransform -> transforms.put(key, Either.right(classTransform)));
+            targetTransforms.left().ifPresent(methodTransforms ->
+                    transforms.computeIfAbsent(key, k -> Either.left(new ArrayList<>())).left().get()
+                            .addAll(methodTransforms));
         } catch (NoSuchTypeExists e) {
             throw new RuntimeException(e);
         }
