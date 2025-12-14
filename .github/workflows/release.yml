@@ -21,7 +21,7 @@ jobs:
           java-version: 21
 
       - name: build jars
-        run: SOURCE_JARS=false ./gradlew build
+        run: SOURCE_JARS=false ./gradlew jar
 
       - name: upload neo jar
         uses: actions/upload-artifact@v4
@@ -65,7 +65,7 @@ jobs:
     needs: [build, neo-setup]
     strategy:
       matrix:
-        neo-version: ${{ needs.neo-setup.outputs.VERSIONS }}
+        neo-version: '["21.10.64", "21.8.13"]'
     steps:
       - uses: actions/checkout@v6
         with:
