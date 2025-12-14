@@ -49,6 +49,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: install xml parser
+        run: npm install fast-xml-parser
+
       - name: create neo matrix
         run: echo "VERSIONS=$(node .github/actions/neo-matrix.js)" >> $GITHUB_OUTPUT
         id: create-neo-matrix

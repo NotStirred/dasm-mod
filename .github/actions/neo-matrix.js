@@ -1,3 +1,5 @@
+const { XMLParser } = require("fast-xml-parser");
+
 
 const response = await fetch("https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml");
 if (!response.ok) {
@@ -5,17 +7,13 @@ if (!response.ok) {
     exit(1);
 }
 
-const parser = new DOMParser();
-const data = parser.parseFromString(response.text(), "application/xml");
+const parser = new XMLParser();
+let data = parser.parse(response.text());
 
-const errorNode = doc.querySelector("parsererror");
-if (errorNode) {
-    console.error("Neoforge maven returned invalid XML?!");
-    exit(1);
-}
+console.log(data)
 
-const output = Array.from(xmlDoc.getElementsByTagName("version"))
-    .map(node => node.childNodes[0].nodeValue)
+const output = data.metadata.versioning.versions
+    .map(node => node.version)
     .filter(version => !version.includes("w")) // filter out weird snapshot versions like 0.25w14craftmine.3-beta
 
 console.log(output)
