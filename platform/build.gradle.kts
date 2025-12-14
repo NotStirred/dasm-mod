@@ -34,9 +34,9 @@ subprojects {
         archiveBaseName.set("dasm-$moduleName")
     }
 
-    configurePublishing(moduleName) {
-        artifact(tasks.getByName("shadowJar"))
-        if (buildSourceAndJavadoc) {
+    if (buildSourceAndJavadoc) {
+        configurePublishing(moduleName) {
+            artifact(tasks.getByName("shadowJar"))
             artifact(tasks.getByName("sourcesJar"))
             artifact(tasks.getByName("javadocJar"))
         }

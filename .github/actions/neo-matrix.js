@@ -1,6 +1,8 @@
+import { XMLParser } from "fast-xml-parser";
+
 try {
 
-    import {XMLParser} from "fast-xml-parser"
+    import "fast-xml-parser"
 
     const response = await fetch("https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml");
     if (!response.ok) {
