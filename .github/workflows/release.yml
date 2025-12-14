@@ -77,5 +77,7 @@ jobs:
           name: neo-jar
           path: build/minecraft-junit/mods/
 
+      - run: ls -R build
+
       - name: run test
         run: "CI=true NEO_VERSION=${{ matrix.neo-version }} ./gradlew --rerun-tasks test"
