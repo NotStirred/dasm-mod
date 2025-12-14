@@ -27,19 +27,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: neo-jar
-          path: platform/neoforge/**.jar
+          path: platform/neoforge/build/libs/*.jar
 
       - name: upload fabric jar
         uses: actions/upload-artifact@v4
         with:
           name: fabric-jar
-          path: platform/fabric/**.jar
+          path: platform/fabric/build/libs/*.jar
 
       - name: upload forge jar
         uses: actions/upload-artifact@v4
         with:
           name: forge-jar
-          path: platform/forge/**.jar
+          path: platform/forge/build/libs/*.jar
 
   neo-setup:
     runs-on: ubuntu-latest
