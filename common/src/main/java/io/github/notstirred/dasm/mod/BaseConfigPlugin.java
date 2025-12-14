@@ -91,15 +91,26 @@ public abstract class BaseConfigPlugin implements IMixinConfigPlugin {
         try {
             IMixinService mixinService = MixinService.getService();
 
-            Class<?> mixinServiceModuleLauncherClass = Class.forName("org.spongepowered.asm.service.modlauncher.MixinServiceModLauncher");
-            Method getTransformationHandler = mixinServiceModuleLauncherClass.getDeclaredMethod("getTransformationHandler");
-            getTransformationHandler.setAccessible(true);
-            Object transformationHandler = getTransformationHandler.invoke(mixinService);
+            Object transformer;
 
-            Class<?> mixinTransformationHandlerClass = Class.forName("org.spongepowered.asm.service.modlauncher.MixinTransformationHandler");
-            Field transformerField = mixinTransformationHandlerClass.getDeclaredField("transformer");
-            transformerField.setAccessible(true);
-            Object transformer = transformerField.get(transformationHandler);
+            if (mixinService.getClass().getName().equals("net.neoforged.fml.loading.mixin.FMLMixinService")) {
+                Class<?> mixinServiceModuleLauncherClass = mixinService.getClass();
+                Field mixinTransformerField = mixinServiceModuleLauncherClass.getDeclaredField("mixinTransformer");
+                mixinTransformerField.setAccessible(true);
+                transformer = mixinTransformerField.get(mixinService);
+            } else if (mixinService.getClass().getName().equals("org.spongepowered.asm.service.modlauncher.MixinServiceModLauncher")) {
+                Class<?> mixinServiceModuleLauncherClass = mixinService.getClass();
+                Method getTransformationHandler = mixinServiceModuleLauncherClass.getDeclaredMethod("getTransformationHandler");
+                getTransformationHandler.setAccessible(true);
+                Object transformationHandler = getTransformationHandler.invoke(mixinService);
+
+                Class<?> mixinTransformationHandlerClass = Class.forName("org.spongepowered.asm.service.modlauncher.MixinTransformationHandler");
+                Field transformerField = mixinTransformationHandlerClass.getDeclaredField("transformer");
+                transformerField.setAccessible(true);
+                transformer = transformerField.get(transformationHandler);
+            } else {
+                throw new RuntimeException("DASM Failed to initalize: Unknown mixin service " + mixinService.getClass().getName());
+            }
 
             Class<?> mixinTransformerClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinTransformer");
             Field processorField = mixinTransformerClass.getDeclaredField("processor");
