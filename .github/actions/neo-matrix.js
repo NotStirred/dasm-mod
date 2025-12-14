@@ -29,5 +29,9 @@ let data = parser.parse(text);
 const output = data.metadata.versioning.versions.version
     .filter(version => !version.includes("w")) // filter out weird snapshot versions like 0.25w14craftmine.3-beta
 
-process.stdout.write("'" + JSON.stringify(output) + "'")
+process.stdout.write("\'" +
+    JSON.stringify(output)
+        .replaceAll("\"", "\\\"")
+    + "\'"
+)
 
