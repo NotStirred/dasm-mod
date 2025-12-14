@@ -1,3 +1,5 @@
+var buildSourceAndJavadoc = (System.getenv("SOURCE_JARS") ?: "true") == "true"
+
 subprojects {
     val moduleName = name
 
@@ -18,8 +20,10 @@ subprojects {
         implementation("org.spongepowered:mixin:0.8")
     }
 
-    tasks.named<Jar>("sourcesJar") {
-        from(project(":common").sourceSets.main.get().java)
+    if (buildSourceAndJavadoc) {
+        tasks.named<Jar>("sourcesJar") {
+            from(project(":common").sourceSets.main.get().java)
+        }
     }
 
     tasks.named<Javadoc>("javadoc") {
@@ -30,10 +34,16 @@ subprojects {
         archiveBaseName.set("dasm-$moduleName")
     }
 
-    configurePublishing(moduleName) {
-        artifact(tasks.getByName("shadowJar"))
-        artifact(tasks.getByName("sourcesJar"))
-        artifact(tasks.getByName("javadocJar"))
+    tasks.named<Jar>("shadowJar") {
+        dependsOn(":common:shadowJar")
+    }
+
+    if (buildSourceAndJavadoc) {
+        configurePublishing(moduleName) {
+            artifact(tasks.getByName("shadowJar"))
+            artifact(tasks.getByName("sourcesJar"))
+            artifact(tasks.getByName("javadocJar"))
+        }
     }
 }
 

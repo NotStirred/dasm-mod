@@ -1,0 +1,71 @@
+on: push
+#    branches:
+#      - 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v1
+        with:
+          java-version: 21
+
+      - name: build jars
+        run: SOURCE_JARS=false ./gradlew shadowJar
+
+      - name: upload neo jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: neo-jar
+          path: platform/neoforge/build/libs/*.jar
+
+      - name: upload fabric jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-jar
+          path: platform/fabric/build/libs/*.jar
+
+      - name: upload forge jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-jar
+          path: platform/forge/build/libs/*.jar
+
+  neo-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install xml parser
+        run: npm install fast-xml-parser
+
+      - name: create neo matrix
+        run: echo "matrix=$(node .github/actions/neo-matrix.js)" >> $GITHUB_OUTPUT
+        id: create-neo-matrix
+
+    outputs:
+      matrix: ${{ steps.create-neo-matrix.outputs.matrix }}
+
+  create-neo-workers:
+    uses: ./.github/workflows/neo-ci.yml
+    needs: [neo-setup, build]
+    strategy:
+      max-parallel: 1 # This is important to avoid ddos GHA API
+      fail-fast: false # Don't fail fast to avoid locking TF State
+      matrix:
+        inner-matrix: ${{ fromJSON(needs.neo-setup.outputs.matrix) }}
+    with:
+      versions: ${{ matrix.inner-matrix }}
