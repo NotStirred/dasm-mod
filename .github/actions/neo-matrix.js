@@ -8,10 +8,10 @@ if (!response.ok) {
 const parser = new XMLParser();
 let data = parser.parse(await response.text());
 
-console.log(data)
+process.stdout.write(data)
 
 const output = data.metadata.versioning.versions
     .map(node => node.version)
     .filter(version => !version.includes("w")) // filter out weird snapshot versions like 0.25w14craftmine.3-beta
 
-console.log(output)
+process.stdout.write(output)

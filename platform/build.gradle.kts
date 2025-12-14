@@ -1,3 +1,5 @@
+var buildSourceAndJavadoc = (System.getenv("SOURCE_JARS") ?: "true") == "true"
+
 subprojects {
     val moduleName = name
 
@@ -18,8 +20,10 @@ subprojects {
         implementation("org.spongepowered:mixin:0.8")
     }
 
-    tasks.named<Jar>("sourcesJar") {
-        from(project(":common").sourceSets.main.get().java)
+    if (buildSourceAndJavadoc) {
+        tasks.named<Jar>("sourcesJar") {
+            from(project(":common").sourceSets.main.get().java)
+        }
     }
 
     tasks.named<Javadoc>("javadoc") {
