@@ -34,6 +34,10 @@ subprojects {
         archiveBaseName.set("dasm-$moduleName")
     }
 
+    tasks.named<Jar>("shadowJar") {
+        dependsOn(":common:shadowJar")
+    }
+
     if (buildSourceAndJavadoc) {
         configurePublishing(moduleName) {
             artifact(tasks.getByName("shadowJar"))
