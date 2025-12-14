@@ -65,7 +65,7 @@ jobs:
     needs: [build, neo-setup]
     strategy:
       matrix:
-        neo-version: ${{ fromJSON('["21.10.64", "21.8.13"]') }} #${{ needs.neo-setup.outputs.VERSIONS }}
+        neo-version: ${{ fromJSON(needs.neo-setup.outputs.VERSIONS) }} #${{ needs.neo-setup.outputs.VERSIONS }}
     steps:
       - uses: actions/checkout@v6
         with:
