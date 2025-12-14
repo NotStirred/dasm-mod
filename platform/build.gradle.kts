@@ -36,8 +36,10 @@ subprojects {
 
     configurePublishing(moduleName) {
         artifact(tasks.getByName("shadowJar"))
-        artifact(tasks.getByName("sourcesJar"))
-        artifact(tasks.getByName("javadocJar"))
+        if (buildSourceAndJavadoc) {
+            artifact(tasks.getByName("sourcesJar"))
+            artifact(tasks.getByName("javadocJar"))
+        }
     }
 }
 
