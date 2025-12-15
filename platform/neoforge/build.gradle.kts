@@ -10,9 +10,5 @@ dependencies {
     shadow(dasm()) {
         isTransitive = false
     }
-    implementation("net.neoforged.fancymodloader:loader:7.0.10")
-}
-
-tasks.withType<JavaCompile> {
-    options.release = 21
+    implementation("net.neoforged.fancymodloader:loader:2.0.0")
 }

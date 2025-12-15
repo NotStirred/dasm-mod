@@ -8,6 +8,12 @@ plugins {
 
 var buildSourceAndJavadoc = (System.getenv("SOURCE_JARS") ?: "true") == "true"
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "com.gradleup.shadow")
@@ -31,12 +37,8 @@ subprojects {
             withJavadocJar()
         }
 
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    tasks.withType<JavaCompile> {
-        options.release = 8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     tasks.named<ShadowJar>("shadowJar") {

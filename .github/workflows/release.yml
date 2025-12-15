@@ -67,6 +67,5 @@ jobs:
       fail-fast: false # Don't fail fast to avoid locking TF State
       matrix:
         inner-matrix: ${{ fromJSON(needs.neo-setup.outputs.matrix) }}
-    name: Group (${{ matrix.inner-matrix }})
     with:
       versions: ${{ matrix.inner-matrix }}
