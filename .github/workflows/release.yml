@@ -55,11 +55,9 @@ jobs:
       - name: create neo matrix
         run: echo "matrix=$(node .github/actions/neo-matrix.js)" >> $GITHUB_OUTPUT
         id: create-neo-matrix
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
     outputs:
-      matrix: ${{ steps.extend-neo-matrix.outputs.matrix }}
+      matrix: ${{ steps.create-neo-matrix.outputs.matrix }}
 
   create-neo-workers:
     uses: ./.github/workflows/neo-ci.yml

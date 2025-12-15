@@ -12,8 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # Don't fail fast to avoid locking TF State
-      matrix: ${{ fromJson(inputs.versions) }}
-    name: Do (${{ matrix.version }})
+      matrix:
+        neo-version: ${{ fromJSON(inputs) }}
+    name: neoforge (${{ matrix.version }})
     steps:
       - uses: actions/checkout@v6
         with:

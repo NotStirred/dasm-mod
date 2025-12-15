@@ -22,19 +22,14 @@ let data = parser.parse(await response.text());
 
 const versions = data.metadata.versioning.versions.version
     .filter(version => !version.includes("w")) // filter out weird snapshot versions like 0.25w14craftmine.3-beta
-    .filter(version => !version.includes("beta"))
-    .map(version => {
-        const o = {};
-        o.version = version;
-        return o;
-    });
+    .filter(version => !version.includes("beta"));
 
-const chunked = chunkify(versions, 6); // 256 is the max size of a gh actions matrix
+const chunked = chunkify(versions, 256); // 256 is the max size of a gh actions matrix
 let output = [];
 
 chunked.forEach(chunk => {
     output.push(JSON.stringify(chunk));
 })
 
-process.stdout.write(JSON.stringify(output))
+process.stdout.write(JSON.stringify(output));
 
