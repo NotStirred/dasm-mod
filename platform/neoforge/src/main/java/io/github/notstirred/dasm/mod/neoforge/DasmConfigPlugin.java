@@ -9,7 +9,6 @@ import io.github.notstirred.dasm.util.ClassNodeProvider;
 import net.neoforged.fml.loading.LoadingModList;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import net.neoforged.neoforgespi.language.IConfigurable;
-import net.neoforged.neoforgespi.locating.InvalidModFileException;
 import org.spongepowered.asm.service.IMixinService;
 import org.spongepowered.asm.service.MixinService;
 
@@ -85,7 +84,7 @@ public class DasmConfigPlugin extends BaseConfigPlugin {
         List<String> dasmConfigFiles = new ArrayList<>();
         for (IConfigurable dasmEntry : dasmEntries) {
             String name = dasmEntry.<String>getConfigElement("config")
-                    .orElseThrow(() -> new InvalidModFileException("Missing \"config\" in [[dasm]] entry", modInfo.getOwningFile()));
+                    .orElseThrow(() -> new RuntimeException(String.format("Missing \"config\" in [[dasm]] entry for mod: %s", modInfo.getModId())));
             dasmConfigFiles.add(name);
         }
 
