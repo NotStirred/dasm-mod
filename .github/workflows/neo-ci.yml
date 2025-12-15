@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false # Don't fail fast to avoid locking TF State
       matrix:
-        neo-version: ${{ fromJSON(inputs) }}
+        neo-version: ${{ fromJSON(inputs.versions) }}
     name: neoforge (${{ matrix.version }})
     steps:
       - uses: actions/checkout@v6
