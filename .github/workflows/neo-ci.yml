@@ -1,0 +1,38 @@
+name: Reusable workflow for 2 level of nested matrices
+on:
+  workflow_call:
+    inputs:
+      versions:
+        description: "Versions"
+        required: true
+        type: string
+
+jobs:
+  neo-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # Don't fail fast to avoid locking TF State
+      matrix: ${{ fromJson(inputs.versions) }}
+    name: Do (${{ matrix.version }})
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: 'NotStirred/dasm-mod-neoforge-ci'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: download neo jar
+        uses: actions/download-artifact@v4
+        with:
+          name: neo-jar
+          path: build/minecraft-junit/mods/
+
+      - run: ls -R build
+
+      - name: run test
+        run: "CI=true NEO_VERSION=${{ matrix.neo-version }} ./gradlew --rerun-tasks test"
