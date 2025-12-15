@@ -31,9 +31,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: neo-jar
-          path: build/minecraft-junit/mods/
+          path: runs/server/mods/
 
-      - run: ls -R build
+      - name: create eula file
+        run: echo eula=true > runs/server/eula.txt
 
       - name: run test
-        run: "CI=true NEO_VERSION=${{ matrix.neo-version }} ./gradlew --rerun-tasks test"
+        run: "CI=true NEO_VERSION=${{ matrix.neo-version }} ./gradlew runServer"
