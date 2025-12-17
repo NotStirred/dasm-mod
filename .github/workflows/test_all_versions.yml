@@ -1,17 +1,10 @@
-on: push
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
 
       - name: Set up JDK 21
         uses: actions/setup-java@v1
@@ -51,7 +44,7 @@ jobs:
         run: npm install fast-xml-parser
 
       - name: create neo matrix
-        run: echo "matrix=$(ONLY_HIGHEST_PATCH=true node .github/actions/neo-matrix.js)" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(ONLY_HIGHEST_PATCH=false node .github/actions/neo-matrix.js)" >> $GITHUB_OUTPUT
         id: create-neo-matrix
 
     outputs:
@@ -67,3 +60,4 @@ jobs:
         inner-matrix: ${{ fromJSON(needs.neo-setup.outputs.matrix) }}
     with:
       versions: ${{ matrix.inner-matrix }}
+      use-cache: false
