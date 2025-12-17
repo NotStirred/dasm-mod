@@ -40,6 +40,7 @@ const text = `<metadata>
 <version>21.8.52</version>
 <version>21.9.16-beta</version>
 <version>21.10.63</version>
+<version>21.10.64</version>
 <version>21.11.6-beta</version>
 </versions>
 <lastUpdated>20251212004616</lastUpdated>
@@ -50,9 +51,14 @@ const parser = new XMLParser();
 // let data = parser.parse(await response.text());
 let data = parser.parse(text);
 
+const version_blacklist = new Set([
+    "21.10.63", // is broken on neogradle 7.1.11, future version should fix it.
+]);
+
 const versions = data.metadata.versioning.versions.version
     .filter(version => !version.includes("w")) // filter out weird snapshot versions like 0.25w14craftmine.3-beta
-    .filter(version => !version.includes("beta"));
+    // .filter(version => !version.includes("beta"))
+    .filter(version => !version_blacklist.has(version));
 
 const chunked = chunkify(versions, 256); // 256 is the max size of a gh actions matrix
 let output = [];
